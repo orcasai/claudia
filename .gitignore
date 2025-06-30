@@ -27,3 +27,6 @@ temp_lib/
 .cursor/
 .claude/
 .roo/
+
+# Claudia runtime files
+.runtime/

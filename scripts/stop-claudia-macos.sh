@@ -33,6 +33,22 @@ print_error() {
 main() {
     print_status "🛑 Stoppe alle Claudia-Prozesse..."
     
+    # Zuerst prüfen ob PID-Datei existiert
+    if [[ -f ".runtime/claudia.pid" ]]; then
+        local saved_pid=$(cat .runtime/claudia.pid 2>/dev/null)
+        if [[ -n "$saved_pid" ]] && kill -0 "$saved_pid" 2>/dev/null; then
+            print_status "Beende Claudia-Prozess (PID: $saved_pid)..."
+            kill -TERM "$saved_pid" 2>/dev/null || true
+            sleep 2
+            # Falls noch läuft, force kill
+            if kill -0 "$saved_pid" 2>/dev/null; then
+                kill -KILL "$saved_pid" 2>/dev/null || true
+            fi
+            print_success "Claudia-Prozess beendet"
+        fi
+        rm -f .runtime/claudia.pid
+    fi
+    
     # Finde und beende Tauri Dev-Server
     local tauri_pids=$(pgrep -f "tauri dev" 2>/dev/null || true)
     if [[ -n "$tauri_pids" ]]; then
@@ -81,7 +97,7 @@ main() {
         print_success "✅ Alle Claudia-Prozesse erfolgreich beendet!"
         print_status ""
         print_status "Um Claudia wieder zu starten:"
-        print_status "  ./start-claudia-macos.sh"
+        print_status "  ./scripts/start-claudia-macos.sh"
     else
         print_warning "⚠️  Einige Prozesse laufen möglicherweise noch:"
         echo "$remaining" | while read pid; do

@@ -259,19 +259,39 @@ main() {
     else
         print_status "🚀 Starte Claudia Entwicklungsserver..."
         print_status ""
-        print_status "📋 WICHTIGE TECHNISCHE INFO:"
-        print_status "• Der Server läuft kontinuierlich im Vordergrund"
-        print_status "• Claudia öffnet sich automatisch als Desktop-App"
-        print_status "• Hot-Reload: Änderungen werden automatisch übernommen"
-        print_status ""
-        print_status "🔧 ZUM BEENDEN:"
-        print_status "• Ctrl+C = Stoppt nur die Terminal-Ausgabe (Server läuft weiter!)"
-        print_status "• Zum kompletten Stoppen: ./stop-claudia-macos.sh"
-        print_status "• Oder schließe das Claudia-Fenster direkt"
-        print_status ""
-        print_status "🎯 Server startet jetzt..."
-        print_status ""
-        bun run tauri dev
+        
+        # Runtime-Verzeichnis erstellen falls nicht vorhanden
+        mkdir -p .runtime
+        
+        # Log-Datei initial erstellen falls sie noch nicht existiert (wichtig für nohup)
+        [[ ! -f .runtime/claudia.log ]] && touch .runtime/claudia.log
+        
+        # Server im Hintergrund starten (anhängen statt überschreiben)
+        nohup bun run tauri dev >> .runtime/claudia.log 2>&1 &
+        CLAUDIA_PID=$!
+        echo $CLAUDIA_PID > .runtime/claudia.pid
+        
+        # Kurz warten um sicherzustellen dass der Prozess läuft
+        sleep 2
+        
+        if kill -0 $CLAUDIA_PID 2>/dev/null; then
+            print_success "✅ Claudia läuft im Hintergrund (PID: $CLAUDIA_PID)"
+            print_status ""
+            print_status "📋 WICHTIGE INFO:"
+            print_status "• Claudia öffnet sich automatisch als Desktop-App"
+            print_status "• Hot-Reload: Änderungen werden automatisch übernommen"
+            print_status "• Logs anzeigen: tail -f .runtime/claudia.log"
+            print_status ""
+            print_status "🔧 ZUM BEENDEN:"
+            print_status "• ./scripts/stop-claudia-macos.sh"
+            print_status "• Oder schließe das Claudia-Fenster direkt"
+            print_status ""
+            print_success "Terminal ist wieder frei - du kannst es schließen oder weiterarbeiten"
+        else
+            print_error "Fehler beim Starten von Claudia"
+            print_status "Überprüfe .runtime/claudia.log für Details"
+            exit 1
+        fi
     fi
 }
 

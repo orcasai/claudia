@@ -97,7 +97,7 @@ main() {
         print_success "✅ Alle Claudia-Prozesse erfolgreich beendet!"
         print_status ""
         print_status "Um Claudia wieder zu starten:"
-        print_status "  ./scripts/start-claudia-macos.sh"
+        print_status "  /Users/robin/Code/claudia/scripts/start-claudia-macos.sh"
     else
         print_warning "⚠️  Einige Prozesse laufen möglicherweise noch:"
         echo "$remaining" | while read pid; do

@@ -283,7 +283,7 @@ main() {
             print_status "• Logs anzeigen: tail -f .runtime/claudia.log"
             print_status ""
             print_status "🔧 ZUM BEENDEN:"
-            print_status "• ./scripts/stop-claudia-macos.sh"
+            print_status "• /Users/robin/Code/claudia/scripts/stop-claudia-macos.sh"
             print_status "• Oder schließe das Claudia-Fenster direkt"
             print_status ""
             print_success "Terminal ist wieder frei - du kannst es schließen oder weiterarbeiten"

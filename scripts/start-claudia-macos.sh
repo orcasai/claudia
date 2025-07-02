@@ -171,8 +171,22 @@ install_bun() {
 
 # Claude Code CLI installieren
 install_claude_cli() {
+    # Check multiple possible locations for claude
+    local claude_found=false
+    local claude_path=""
+    
+    # Check if claude exists as command (handles PATH)
     if command_exists claude; then
-        local version=$(claude --version 2>/dev/null || echo "unbekannt")
+        claude_found=true
+        claude_path="claude"
+    # Check common installation path
+    elif [[ -x "$HOME/.claude/local/claude" ]]; then
+        claude_found=true
+        claude_path="$HOME/.claude/local/claude"
+    fi
+    
+    if [[ "$claude_found" == true ]]; then
+        local version=$($claude_path --version 2>/dev/null || echo "unbekannt")
         print_success "Claude Code CLI ist bereits installiert (Version: $version)"
     else
         print_warning "Claude Code CLI ist nicht installiert!"
@@ -185,8 +199,9 @@ install_claude_cli() {
         
         read -p "Drücke Enter wenn Claude Code CLI installiert ist..."
         
-        if command_exists claude; then
-            local version=$(claude --version 2>/dev/null || echo "unbekannt")
+        # Re-check after user confirmation
+        if command_exists claude || [[ -x "$HOME/.claude/local/claude" ]]; then
+            local version=$(claude --version 2>/dev/null || $HOME/.claude/local/claude --version 2>/dev/null || echo "unbekannt")
             print_success "Claude Code CLI gefunden (Version: $version)"
         else
             print_error "Claude Code CLI ist immer noch nicht verfügbar. Bitte installiere es manuell."
